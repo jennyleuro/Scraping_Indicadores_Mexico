@@ -2,11 +2,8 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-import time
 import pandas as pd
 from selenium.webdriver.common.keys import Keys
-from lxml import html
-import requests
 
 # Opciones de navegación
 
@@ -47,10 +44,6 @@ WebDriverWait(driver, 5)\
         .click()
 
 driver.switch_to.window(driver.window_handles[1])
-
-encabezados = {
-    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36"
-}
 
 tipo_cambio_fecha = driver.find_elements_by_xpath("//body//table//td[@valign='top' and @align='center']//tr[@align='left']/td")
 tipo_cambio_datos = driver.find_elements_by_xpath("//body//table//td[@valign='top' and @align='center']//tr[@align='right']/td")
