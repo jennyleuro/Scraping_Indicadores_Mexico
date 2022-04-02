@@ -4,6 +4,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 import time
 import pandas as pd
+from selenium.webdriver.common.keys import Keys
+
 
 # Opciones de navegación
 
@@ -25,15 +27,33 @@ WebDriverWait(driver, 5)\
     'button#graph_nodo_6_SF43707')))\
         .click()
 
-print('PRINT DE DANIELOS: '+str(driver.find_element_by_id('informacionCuadro')))
+driver.switch_to.frame(driver.find_element(By.ID, 'iframeGrafica'))
 
-WebDriverWait(driver, 10)\
+WebDriverWait(driver, 5)\
     .until(EC.element_to_be_clickable((By.CSS_SELECTOR, 
     'button#btnDatos')))\
         .click()
 
-print('PRINT DE DANIELOS 2: '+str(driver.find_element_by_id('informacionCuadro')))
+reservas= driver.find_elements_by_xpath("//table[@id = 'tableData']//tr[@data-ts]")
 
-    
+reservas_fecha_text, reservas_datos_text= [], []
 
+for dato in reservas:
+    reserva_int = dato.text.split()
+
+    if(reserva_int[0] == '31/12/2004'):
+        break
+    else:
+        reservas_fecha_text.append(reserva_int[0])
+        reservas_datos_text.append(reserva_int[1])
+
+
+
+#Diccionario con la información
+data = {'Periodo': reservas_fecha_text,
+        'Dato': reservas_datos_text}
+
+df = pd.DataFrame(data, columns=['Periodo', 'Dato'])
+df.to_csv('data_reservas_int.csv')
+print('Se guardó el archivo')
 

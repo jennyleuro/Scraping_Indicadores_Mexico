@@ -2,6 +2,8 @@ import pandas as pd
 
 path = "SH_BM_202112.xlsm"
 
-df = pd.read_excel(path, sheet_name="Hoja2", )
+df = pd.read_excel(path, sheet_name="Hoja2")
 
-print(df.columns)
+fila_113 = df.iloc[1]
+
+print(fila_113)
