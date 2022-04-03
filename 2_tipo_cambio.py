@@ -1,3 +1,6 @@
+from datetime import datetime
+from time import strptime
+from numpy import NaN
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -36,7 +39,7 @@ WebDriverWait(driver, 5)\
 WebDriverWait(driver, 5)\
     .until(EC.element_to_be_clickable((By.CSS_SELECTOR, 
     'input.renglonNon')))\
-        .send_keys('01/01/2005')     
+        .send_keys('01/03/2005')     
 
 WebDriverWait(driver, 5)\
     .until(EC.element_to_be_clickable((By.CSS_SELECTOR, 
@@ -53,8 +56,12 @@ del tipo_cambio_datos[len(tipo_cambio_fecha):]
 fecha_text_list, datos_text_list = [], []
 
 for dato in tipo_cambio_datos:
-    valor_text = dato.text
-    datos_text_list.append(valor_text)
+    dato_text = dato.text
+
+    if(dato_text == 'N/E'):
+        datos_text_list.append(NaN)
+    else:
+        datos_text_list.append(float(dato_text))
 
 for fecha in tipo_cambio_fecha:
     fecha_text = fecha.text
@@ -65,7 +72,18 @@ diccionario_tipo_cambio = {'Fecha': fecha_text_list,
             }
 
 df = pd.DataFrame(diccionario_tipo_cambio, columns=['Fecha', 'Tipo de Cambio'])
-df.to_csv('data_tipo_cambio_mex.csv')
+
+#Calculando el promedio mensual
+df['Fecha'] = pd.to_datetime(df['Fecha'], format='%d/%m/%Y')
+df = df.set_index('Fecha')
+
+#Eliminando valores nulos para no afectar el promedio
+df.dropna() 
+
+#Promedio mensual
+prom_mensual = df.resample('M').mean()
+
+prom_mensual.to_csv('data_tipo_cambio_mex.csv')
 print("Se extrajo la información y se guardó en csv")
 
 

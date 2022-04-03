@@ -51,11 +51,6 @@ WebDriverWait(driver, 5)\
 
 time.sleep(5)
 
-""" WebDriverWait(driver, 5)\
-    .until(EC.element_to_be_clickable((By.CSS_SELECTOR, 
-    'input#Exportar')))\
-        .click() """
-
 exportaciones = driver.find_elements_by_xpath("//div[@id = 'ctl00_cphPage_ContentUpdatePanel2']/center//tr[@valign='top']")
 
 periodos, datos = [], []
