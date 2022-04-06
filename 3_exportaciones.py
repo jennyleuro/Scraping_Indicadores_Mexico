@@ -58,7 +58,7 @@ periodos, datos = [], []
 for exportacion in exportaciones:
     export = exportacion.text.split()
 
-    if(export[0] == '2004/12'):
+    if(export[0] == '1999/12'):
         break
     else:
         periodos.append(export[0])

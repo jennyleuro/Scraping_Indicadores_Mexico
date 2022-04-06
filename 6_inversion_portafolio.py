@@ -35,12 +35,14 @@ WebDriverWait(driver, 5)\
 
 portafolio= driver.find_elements_by_xpath("//table[@id = 'tableData']//tr[@data-ts]")
 
+print("YA EXTRAGE LA INFORMACIÓN!!!!!!!!!!!!!!!!\n")
+
 portafolio_fecha_text, portafolio_datos_text= [], []
 
 for dato in portafolio:
     portafolio_inv = dato.text.split()
 
-    if(portafolio_inv[0] == '01/10/2004'):
+    if(portafolio_inv[0] == '01/10/1999'):
         break
     else:
         portafolio_fecha_text.append(portafolio_inv[0])

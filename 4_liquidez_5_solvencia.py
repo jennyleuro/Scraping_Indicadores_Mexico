@@ -44,24 +44,17 @@ df = df.set_index('Indicadores del Balance General (millones de pesos corrientes
 
 #Eliminando columnas innecesarias
 df = df.drop(['Unnamed: 0'], axis = 1)
-fecha_inicial = datetime.strptime("2005/01/01", "%Y/%m/%d")
-for col in df:
-  if col < fecha_inicial:
-    df = df.drop([col], axis=1)
 
 #Cambiando Columnas por filas
 df = df.transpose()
 
 
 #Data frame con sólo la info necesaria
-df_resumen = df[['Depósitos de exigibilidad inmediata','Depósitos a plazo y títulos de crédito emitidos', 'Activo','Capital contable']]
-
-#Calculando Depósitos
-df_resumen['Depósitos'] = df_resumen['Depósitos de exigibilidad inmediata'] + df_resumen['Depósitos a plazo y títulos de crédito emitidos']
+df_resumen = df[['Pasivo', 'Activo','Capital contable']]
 
 #Data frame liquidez calculada
 df_liquidez = pd.DataFrame()
-df_liquidez['Liquidez'] = df_resumen['Depósitos']/df_resumen['Activo']
+df_liquidez['Liquidez'] = df_resumen['Pasivo']/df_resumen['Activo']
 
 #Data frame solvencia calculada
 df_solvencia = pd.DataFrame()

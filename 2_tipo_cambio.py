@@ -1,5 +1,3 @@
-from datetime import datetime
-from time import strptime
 from numpy import NaN
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
@@ -39,7 +37,7 @@ WebDriverWait(driver, 5)\
 WebDriverWait(driver, 5)\
     .until(EC.element_to_be_clickable((By.CSS_SELECTOR, 
     'input.renglonNon')))\
-        .send_keys('01/03/2005')     
+        .send_keys('01/01/2000')     
 
 WebDriverWait(driver, 5)\
     .until(EC.element_to_be_clickable((By.CSS_SELECTOR, 
@@ -73,8 +71,10 @@ diccionario_tipo_cambio = {'Fecha': fecha_text_list,
 
 df = pd.DataFrame(diccionario_tipo_cambio, columns=['Fecha', 'Tipo de Cambio'])
 
-#Calculando el promedio mensual
+#Cambio de formato para fecha
 df['Fecha'] = pd.to_datetime(df['Fecha'], format='%d/%m/%Y')
+
+#Fecha como index
 df = df.set_index('Fecha')
 
 #Eliminando valores nulos para no afectar el promedio

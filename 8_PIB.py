@@ -33,7 +33,7 @@ periodos, datos = [], []
 for dato in PIB:
     PIB_trimestral = dato.text.split()
 
-    if(PIB_trimestral[0] == '2004/04'):
+    if(PIB_trimestral[0] == '1999/04'):
         break
     else:
         periodos.append(PIB_trimestral[0])
