@@ -1,9 +1,15 @@
+import locale
+from xml.etree.ElementTree import PI
+from numpy import NaN
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 import pandas as pd
 import time 
+
+#Configuración para decimales con coma y
+locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 # Opciones de navegación
 options = webdriver.ChromeOptions()
@@ -35,9 +41,13 @@ for dato in PIB:
 
     if(PIB_trimestral[0] == '1999/04'):
         break
-    else:
+    elif (PIB_trimestral[1] == 'N/E'):
+        datos.append(NaN)
         periodos.append(PIB_trimestral[0])
-        datos.append(PIB_trimestral[1])
+    else:
+        dato_text = locale.atof(PIB_trimestral[1])
+        datos.append(dato_text)
+        periodos.append(PIB_trimestral[0])
 
 #Diccionario con la información
 data = {'Periodo': periodos,

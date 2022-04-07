@@ -1,3 +1,5 @@
+import locale
+from numpy import NaN
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -5,6 +7,8 @@ from selenium.webdriver.common.by import By
 import pandas as pd
 from selenium.webdriver.common.keys import Keys
 
+#Configuración para decimales con coma y
+locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 # Opciones de navegación
 
@@ -34,8 +38,6 @@ WebDriverWait(driver, 5)\
 
 portafolio= driver.find_elements_by_xpath("//table[@id = 'tableData']//tr[@data-ts]")
 
-print("YA EXTRAGE LA INFORMACIÓN!!!!!!!!!!!!!!!!\n")
-
 portafolio_fecha_text, portafolio_datos_text= [], []
 
 for dato in portafolio:
@@ -43,11 +45,13 @@ for dato in portafolio:
 
     if(portafolio_inv[0] == '01/10/1999'):
         break
-    else:
+    elif (portafolio_inv[1] == 'N/E'):
+        portafolio_datos_text.append(NaN)
         portafolio_fecha_text.append(portafolio_inv[0])
-        portafolio_datos_text.append(portafolio_inv[1])
-
-
+    else:
+        dato_text = locale.atof(portafolio_inv[1])
+        portafolio_datos_text.append(dato_text)
+        portafolio_fecha_text.append(portafolio_inv[0])
 
 #Diccionario con la información
 data = {'Periodo': portafolio_fecha_text,

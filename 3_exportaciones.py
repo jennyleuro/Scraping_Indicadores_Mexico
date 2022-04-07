@@ -1,9 +1,14 @@
+import locale
+from numpy import NaN
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 import pandas as pd
 import time 
+
+#Configuración para decimales con coma y
+locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 # Opciones de navegación
 options = webdriver.ChromeOptions()
@@ -60,9 +65,14 @@ for exportacion in exportaciones:
 
     if(export[0] == '1999/12'):
         break
-    else:
+    elif (export[1] == 'N/E'):
+        datos.append(NaN)
         periodos.append(export[0])
-        datos.append(export[1])
+    else:
+        dato_text = locale.atof(export[1])
+        datos.append(dato_text)
+        periodos.append(export[0])
+
 
 #Diccionario con la información
 data = {'Periodo': periodos,
