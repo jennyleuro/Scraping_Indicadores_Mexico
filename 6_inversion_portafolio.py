@@ -11,7 +11,6 @@ from selenium.webdriver.common.keys import Keys
 options = webdriver.ChromeOptions()
 options .add_argument('--start-maximized')
 options .add_argument('--disable-extensions')
-#options.add_experimental_option('excludeSwitches', ['enable-logging'])
 
 driver_path =  "D:\Chrome driver\chromedriver.exe"
 
