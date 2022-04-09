@@ -3,18 +3,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 import pandas as pd
-from datetime import datetime
+import funciones_mex as fmex
 
 # Opciones de navegación
-options = webdriver.ChromeOptions()
-options .add_argument('--start-maximized')
-options .add_argument('--disable-extensions')
-options.add_experimental_option('prefs', {
-    "download.default_directory": "D:\\2022-I\Práctica I\Primera asignación\México"
-})
-
-driver_path =  "D:\Chrome driver\chromedriver.exe"
-driver = webdriver.Chrome(driver_path, options = options)
+driver = fmex.browserOptions("D:\Chrome driver\chromedriver.exe")
 
 # Inicializar el navegador
 driver.get('https://www.cnbv.gob.mx/SECTORES-SUPERVISADOS/BANCA-MULTIPLE/Paginas/Información-Estadística.aspx')

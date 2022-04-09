@@ -1,20 +1,13 @@
 from numpy import NaN
-from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 import pandas as pd
 from selenium.webdriver.common.keys import Keys
+import funciones_mex as fmex
 
 # Opciones de navegación
-
-options = webdriver.ChromeOptions()
-options .add_argument('--start-maximized')
-options .add_argument('--disable-extensions')
-
-driver_path =  "D:\Chrome driver\chromedriver.exe"
-
-driver = webdriver.Chrome(driver_path, options = options)
+driver = fmex.browserOptions("D:\Chrome driver\chromedriver.exe")
 
 # Inicializar el navegador
 driver.get('https://www.banxico.org.mx/tipcamb/main.do?page=tip&idioma=sp')
@@ -71,19 +64,12 @@ diccionario_tipo_cambio = {'Fecha': fecha_text_list,
 
 df = pd.DataFrame(diccionario_tipo_cambio, columns=['Fecha', 'Tipo de Cambio'])
 
-#Cambio de formato para fecha
-df['Fecha'] = pd.to_datetime(df['Fecha'], format='%d/%m/%Y')
-
-#Fecha como index
-df = df.set_index('Fecha')
-
-#Eliminando valores nulos para no afectar el promedio
-df.dropna() 
+#Limpieza de datos
+df = fmex.dataCleaning(df, '%d/%m/%Y')
 
 #Promedio mensual
 prom_mensual = df.resample('M').mean()
 
 prom_mensual.to_csv('data_tipo_cambio_mex.csv')
 print("Se extrajo la información y se guardó en csv")
-
 
