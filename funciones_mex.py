@@ -3,6 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.support import expected_conditions as EC
 import pandas as pd
 from numpy import NaN
+import numpy as np
 import time
 from datetime import datetime
 from selenium.webdriver.support.ui import WebDriverWait
@@ -28,20 +29,29 @@ def infoSplitDf(list_info, indicador):
     
     for dato in list_info:
         info_text = dato.text.split()
+        
+        if (indicador == 'PIB'):
+            if('/01' in info_text[0]):
+                info_text[0] = info_text[0][0:4]+'/03'
+            elif('/02' in info_text[0]):
+                info_text[0] = info_text[0][0:4]+'/06'
+            elif('/03' in info_text[0]):
+                info_text[0] = info_text[0][0:4]+'/09'
+            elif('/04' in info_text[0]):
+                info_text[0] = info_text[0][0:4]+'/12'
+
         if(info_text[0] == '31/12/1999' or info_text[0] == '1999/04' or info_text[0] == '1999/12'):
             break
         elif (info_text[1] == 'N/E'):
             datos_text.append(NaN)
-            fecha_text.append(info_text[0])
         else:
             dato_text = locale.atof(info_text[1])
             datos_text.append(dato_text)
-            fecha_text.append(info_text[0])
+        fecha_text.append(info_text[0])
 
     data = {'Fecha': fecha_text,
         indicador: datos_text}
     df = pd.DataFrame(data, columns=['Fecha', indicador])
-
     return df
 
 def dataCleaning(df, date_format):
@@ -49,6 +59,7 @@ def dataCleaning(df, date_format):
     df = df.set_index('Fecha')
     df.dropna() 
     df = df.sort_index()
+
     return df
 
 def getDownLoadedFileName(waitTime, driver):
@@ -92,7 +103,7 @@ def reservasMex(driver):
     
     #Limpieza de datos y almacenamiento en Data Frame
     reservas= driver.find_elements_by_xpath("//table[@id = 'tableData']//tr[@data-ts]")
-    df = infoSplitDf(reservas, 'Reservas')    
+    df = infoSplitDf(reservas, 'Reservas')
     df = dataCleaning(df, '%d/%m/%Y')
     prom_mensual = df.resample('M').mean()
 
@@ -246,6 +257,7 @@ def liquidezSolvencia(driver):
     df_liquidez_solvencia['Liquidez'] = df_resumen['Pasivo']/df_resumen['Activo']
     df_liquidez_solvencia['Solvencia'] = df_resumen['Capital contable']/df_resumen['Activo']
     df_liquidez_solvencia = df_liquidez_solvencia.sort_index()
+    df_liquidez_solvencia.index.name = 'Fecha'
 
     return df_liquidez_solvencia
 
@@ -270,7 +282,6 @@ def inversionPortafolio(driver):
     #Limpieza de datos
     df = infoSplitDf(portafolio, 'Inversión de Portafolio')    
     df = dataCleaning(df, '%d/%m/%Y')
-
     return df
 
 def deudaPublica(driver):
@@ -283,6 +294,9 @@ def deudaPublica(driver):
             .click()
 
     nombre_archivo = getDownLoadedFileName(180, driver) #Se esperan 3 minutos a que se descargue
+    print('--------------NOMBRE DEL ARCHIVO')
+    print(nombre_archivo)
+    print('---------------------------------')
 
     #Leyendo el archivo
     archivo_excel = pd.ExcelFile(nombre_archivo)
@@ -319,9 +333,10 @@ def PIB(driver):
     pib = driver.find_elements_by_xpath("//div[@id = 'ctl00_cphPage_ContentUpdatePanel2']/center//tr[@valign='top']")
 
     #Separando la info, pasando los datos a números y obteniendo data frame
-    df = infoSplitDf(pib, 'PIB')    
+    df = infoSplitDf(pib, 'PIB')  
 
     #Limpieza de datos
+    df.dropna()
     
     return df
 
@@ -335,3 +350,32 @@ def tasaCrecimiento(df, columna):
     df['Tasa Crecimiento'] = tasa_crecimiento_list    
     return df
 
+def text_format(val):
+    color = 'white'
+    if (val == 'Crisis'):
+      color = '#ff0000'
+    elif (val == 'Alerta'):
+      color = '#ffff00'
+    return 'background-color: %s' % color
+
+def espisodios(df, columns_names):
+    df['Media Movil']=df[columns_names[-1]].rolling(window=8).mean()
+    df['D.E']=df[columns_names[-1]].rolling(window=8).std()
+    df['Sistem Alertas'] = (df[columns_names[-1]]-df['Media Movil'])/df['D.E']
+    conditionlist = []
+
+    # Indicadores en alerta y crisis con valores negativos
+    if(columns_names[0] == 'Liquidez' or columns_names[0] == 'Solvencia' or columns_names[0] == 'Reservas' or columns_names[0] == 'PIB' or columns_names[0] == 'Inversión de Portafolio'):
+        conditionlist = [
+            ((-1.5 >= df['Sistem Alertas'])) & ((df['Sistem Alertas'] > -2.0)),
+            (-2.0 >= df['Sistem Alertas']),
+            (-1.5 < df['Sistem Alertas'])]
+    # Indicadores en alerta y crisis con calores positivos
+    else:
+        conditionlist = [
+            ((1.5 <= df['Sistem Alertas'])) & ((df['Sistem Alertas'] < 2.0)),
+            (2.0 <= df['Sistem Alertas']),
+            (1.5 > df['Sistem Alertas'])]
+    choicelist = ['Alerta', 'Crisis', 'Sin Episodio']
+    df['Episodio'] = np.select(conditionlist, choicelist, default='Not Specified')
+    return df
