@@ -9,14 +9,15 @@ from datetime import datetime
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-
+import os
 
 def browserOptions(driverpath):
+    path = os.getcwd()
     options = webdriver.ChromeOptions()
     options.add_argument('--start-maximized')
     options.add_argument('--disable-extensions')
     options.add_experimental_option('prefs', {
-    "download.default_directory": "D:\\2022-I\Práctica I\Primera asignación\México"
+    "download.default_directory": path
     })
     driver_path = driverpath
     driver = webdriver.Chrome(driver_path, options = options) 
@@ -294,9 +295,6 @@ def deudaPublica(driver):
             .click()
 
     nombre_archivo = getDownLoadedFileName(180, driver) #Se esperan 3 minutos a que se descargue
-    print('--------------NOMBRE DEL ARCHIVO')
-    print(nombre_archivo)
-    print('---------------------------------')
 
     #Leyendo el archivo
     archivo_excel = pd.ExcelFile(nombre_archivo)
@@ -316,7 +314,6 @@ def deudaPublica(driver):
     df_deuda_total = pd.DataFrame()
     df_deuda_total['Deuda Pública'] = df['SG193'] + df['SG199']
     df_deuda_total = df_deuda_total.sort_index()
-
     return df_deuda_total
 
 def PIB(driver):
@@ -365,12 +362,13 @@ def espisodios(df, columns_names):
     conditionlist = []
 
     # Indicadores en alerta y crisis con valores negativos
-    if(columns_names[0] == 'Liquidez' or columns_names[0] == 'Solvencia' or columns_names[0] == 'Reservas' or columns_names[0] == 'PIB' or columns_names[0] == 'Inversión de Portafolio'):
+    if(columns_names[0] == 'Liquidez' or columns_names[0] == 'Solvencia' or 
+    columns_names[0] == 'Reservas' or columns_names[0] == 'PIB' or columns_names[0] == 'Inversión de Portafolio'):
         conditionlist = [
             ((-1.5 >= df['Sistem Alertas'])) & ((df['Sistem Alertas'] > -2.0)),
             (-2.0 >= df['Sistem Alertas']),
             (-1.5 < df['Sistem Alertas'])]
-    # Indicadores en alerta y crisis con calores positivos
+    # Indicadores en alerta y crisis con valores positivos
     else:
         conditionlist = [
             ((1.5 <= df['Sistem Alertas'])) & ((df['Sistem Alertas'] < 2.0)),
@@ -379,3 +377,16 @@ def espisodios(df, columns_names):
     choicelist = ['Alerta', 'Crisis', 'Sin Episodio']
     df['Episodio'] = np.select(conditionlist, choicelist, default='Not Specified')
     return df
+
+def episode_count(df, indicador):
+  crisis = 0
+  alertas = 0
+  for episodio in df['Episodio']:
+    if(episodio == 'Alerta'):
+      alertas += 1
+    elif (episodio == 'Crisis'):
+      crisis += 1
+  episode_quantity = [indicador, alertas, crisis]
+  return episode_quantity
+
+
